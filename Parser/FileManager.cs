@@ -12,11 +12,11 @@ namespace Parser
     {
         private static readonly string BaseDirectory = "D:\\ИИ ПРОЕКТ\\parse\\";
 
-        public static async Task SaveSinglePostToTxt(string userId, string postText, int postIndex)
+        public static async Task SaveSinglePostToTxt(string userId, string postText, long postIndex)
         {
             try
             {
-                string userDirectory = Path.Combine(BaseDirectory, userId, "Posts");
+                string userDirectory = Path.Combine(BaseDirectory, userId, "posts");
                 Directory.CreateDirectory(userDirectory);
 
                 string filePath = Path.Combine(userDirectory, $"post_{postIndex}.txt");
@@ -54,7 +54,6 @@ namespace Parser
             try
             {
                 string userDirectory = Path.Combine(BaseDirectory, userId, "photos");
-                Console.WriteLine(userDirectory);
                 Directory.CreateDirectory(userDirectory);
 
                 string extension = Path.GetExtension(url.Split('?')[0]) ?? ".jpg";
@@ -63,7 +62,7 @@ namespace Parser
 
                 byte[] imageBytes = await client.GetByteArrayAsync(url);
                 await File.WriteAllBytesAsync(fullPath, imageBytes);
-                Console.WriteLine($"Фото сохранено: {fullPath}");
+                Console.WriteLine($"Фото #{photoId} сохранёно: {fullPath}");
             }
             catch (Exception ex)
             {

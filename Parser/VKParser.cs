@@ -47,19 +47,17 @@ namespace Parser
 
                     foreach (var post in posts)
                     {
+                        postId++;
                         string text = post["text"]?.ToString();
                         if (!string.IsNullOrEmpty(text))
                         {
-                            
-                            texts.Add(text);
+                            await FileManager.SaveSinglePostToTxt(userId, text, postId);
                         }
                         await ParsePhoto(post, userId);
                     }
-
-                    await FileManager.SavePostsToJson(userId, texts);
                     offset += batchSize;
 
-                    await Task.Delay(340);
+                    await Task.Delay(500);
                 }
             }
             catch (Exception ex)
@@ -86,18 +84,6 @@ namespace Parser
             }
         }
 
-        private string GetMaxSizePhotoUrl(JToken photo)
-        {
-            string[] sizePriority = { "photo_2560", "photo_1280", "photo_807", "photo_604", "photo_130", "photo_75" };
-
-            foreach (var size in sizePriority)
-            {
-                if (photo[size] != null)
-                    return photo[size].ToString();
-            }
-
-            return null;
-        }
     }
 
 }
