@@ -11,6 +11,8 @@ namespace Parser
     {
         private readonly HttpClient _httpClient;
         private readonly string _accessToken;
+        static long photoId = 0;
+        static long postId = 0;
 
         public VkApiService(HttpClient httpClient, string accessToken)
         {
@@ -22,45 +24,42 @@ namespace Parser
         {
             try
             {
-                //КОЛИЧЕСТВО ПОСТОВ
-                string metaApiUrl = $"https://api.vk.com/method/wall.get?domain={userId}&count=1&access_token={_accessToken}&v=5.131";
 
+                string metaApiUrl = $"https://api.vk.com/method/wall.get?domain={userId}&count=1&access_token={_accessToken}&v=5.131";
                 string response = await _httpClient.GetStringAsync(metaApiUrl);
                 JObject data = JObject.Parse(response);
 
                 int totalPosts = (int)data["response"]["count"];
                 Console.WriteLine($"Всего постов на стене: {totalPosts}");
 
-                
-                int batchSize = 0;
 
-                while (totalPosts > 0)
+                int batchSize = 10;
+                int offset = 0;
+
+                while (offset < totalPosts)
                 {
-                    string apiUrl = $"https://api.vk.com/method/wall.get?domain={userId}&count=10&access_token={_accessToken}&v=5.131&extended=1";
-
+                    string apiUrl = $"https://api.vk.com/method/wall.get?domain={userId}&count={batchSize}&offset={offset}&access_token={_accessToken}&v=5.131&extended=1";
                     response = await _httpClient.GetStringAsync(apiUrl);
                     JObject json = JObject.Parse(response);
-                    
-                    //File.WriteAllText("D:\\ИИ ПРОЕКТ\\test.json", json.ToString());
 
                     var texts = new List<string>();
                     JArray posts = (JArray)json["response"]["items"];
 
-                    batchSize = posts.Count;
-                    totalPosts -= batchSize;
-
                     foreach (var post in posts)
                     {
-
                         string text = post["text"]?.ToString();
                         if (!string.IsNullOrEmpty(text))
                         {
+                            
                             texts.Add(text);
                         }
-
                         await ParsePhoto(post, userId);
                     }
+
                     await FileManager.SavePostsToJson(userId, texts);
+                    offset += batchSize;
+
+                    await Task.Delay(340);
                 }
             }
             catch (Exception ex)
@@ -69,8 +68,6 @@ namespace Parser
             }
         }
 
-
-        static long photoId;
         private async Task ParsePhoto(JToken post, string userId)
         {
             if (post["attachments"] == null)
