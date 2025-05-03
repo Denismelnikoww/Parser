@@ -10,7 +10,7 @@ namespace Parser
 
     public static class FileManager
     {
-        private static readonly string BaseDirectory = "D:\\ИИ ПРОЕКТ\\parse\\";
+        private static readonly string BaseDirectory = "C:\\Users\\Артем\\Downloads\\parse";
 
         public static async Task SaveSinglePostToTxt(string userId, string postText, long postIndex)
         {

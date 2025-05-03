@@ -20,6 +20,12 @@ namespace Parser
             _accessToken = accessToken;
         }
 
+        public async Task ParseUser(string userId)
+        {
+            await ParseUserWall(userId);
+            await DownloadUserMainPhoto(userId);
+        }
+
         public async Task ParseUserWall(string userId)
         {
             try
@@ -84,6 +90,31 @@ namespace Parser
             }
         }
 
+        public async Task DownloadUserMainPhoto(string userId)
+        {
+            try
+            {
+                string apiUrl = $"https://api.vk.com/method/users.get?user_ids={userId}&fields=photo_max_orig&access_token={_accessToken}&v=5.131";
+                string response = await _httpClient.GetStringAsync(apiUrl);
+                JObject data = JObject.Parse(response);
+
+                if (data["response"] == null || data["response"].FirstOrDefault()?["photo_max_orig"] == null)
+                {
+                    Console.WriteLine("Не удалось получить основную фотографию пользователя или доступ закрыт.");
+                    return;
+                }
+
+                string photoUrl = data["response"].FirstOrDefault()["photo_max_orig"].ToString();
+
+                await FileManager.DownloadPhoto(_httpClient, photoUrl, userId, "main_photo");
+
+                Console.WriteLine("Основная фотография успешно сохранена.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при получении основной фотографии: {ex.Message}");
+            }
+        }
     }
 
 }
