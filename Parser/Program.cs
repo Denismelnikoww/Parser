@@ -37,7 +37,6 @@ namespace Parser
                 .Build();
 
             string vkAccessToken = configuration["VK_API"];
-            string vkAccessToken = "c3f0ff24c3f0ff24c3f0ff249bc0c0f6cecc3f0c3f0ff24abf9cb1eb20fc25cf246849a";
 
             
 
